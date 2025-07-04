@@ -1,0 +1,42 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                count
+---------------  -------
+all                    1
+filter_variants        1
+index_dedup_bam        1
+variant_calling        1
+total                  4
+
+Select jobs to execute...
+
+[Fri Jul  4 01:02:58 2025]
+rule variant_calling:
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam, results/raw/reference.fasta
+    output: results/variants/variants.vcf
+    jobid: 14
+    reason: Missing output files: results/variants/variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:03:01 2025]
+Error in rule variant_calling:
+    jobid: 14
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam, results/raw/reference.fasta
+    output: results/variants/variants.vcf
+    shell:
+        
+        echo Calling variants...
+        mkdir -p results/variants
+        gatk HaplotypeCaller -R results/raw/reference.fasta -I results/aligned/dedup.bam -O results/variants/variants.vcf
+        echo Variants called!
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Removing output files of failed job variant_calling since they might be corrupted:
+results/variants/variants.vcf
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T010257.674129.snakemake.log

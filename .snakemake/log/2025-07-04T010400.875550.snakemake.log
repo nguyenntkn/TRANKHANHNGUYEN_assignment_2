@@ -1,0 +1,65 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                count
+---------------  -------
+all                    1
+filter_variants        1
+index_dedup_bam        1
+variant_calling        1
+total                  4
+
+Select jobs to execute...
+
+[Fri Jul  4 01:04:01 2025]
+rule index_dedup_bam:
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam
+    output: results/aligned/dedup.bam.bai
+    jobid: 13
+    reason: Missing output files: results/aligned/dedup.bam.bai
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:04:01 2025]
+Finished job 13.
+1 of 4 steps (25%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:04:01 2025]
+rule variant_calling:
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam, results/aligned/dedup.bam.bai, results/raw/reference.fasta
+    output: results/variants/variants.vcf
+    jobid: 14
+    reason: Missing output files: results/variants/variants.vcf; Input files updated by another job: results/aligned/dedup.bam.bai
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:04:27 2025]
+Finished job 14.
+2 of 4 steps (50%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:04:27 2025]
+rule filter_variants:
+    input: results/snakemake/.dirs_created, results/variants/variants.vcf
+    output: results/variants/filtered_variants.vcf
+    jobid: 15
+    reason: Missing output files: results/variants/filtered_variants.vcf; Input files updated by another job: results/variants/variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:04:31 2025]
+Finished job 15.
+3 of 4 steps (75%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:04:31 2025]
+localrule all:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/raw/SRR1972739.fastq, results/qc/SRR1972739_fastqc.html, results/raw/reference.fasta.fai, results/raw/reference.dict, results/aligned/aligned.sam, results/aligned/aligned.sorted.bam, results/aligned/validation_report.txt, results/aligned/dedup.bam, results/aligned/dup_metrics.txt, results/aligned/dedup.bam.bai, results/variants/variants.vcf, results/variants/filtered_variants.vcf
+    jobid: 0
+    reason: Input files updated by another job: results/aligned/dedup.bam.bai, results/variants/variants.vcf, results/variants/filtered_variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:04:31 2025]
+Finished job 0.
+4 of 4 steps (100%) done
+Complete log: .snakemake/log/2025-07-04T010400.875550.snakemake.log

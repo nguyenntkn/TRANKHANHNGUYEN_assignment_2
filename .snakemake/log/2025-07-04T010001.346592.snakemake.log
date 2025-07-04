@@ -1,0 +1,111 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                  count
+-----------------  -------
+all                      1
+bwa_index                1
+filter_variants          1
+index_dedup_bam          1
+mark_duplicates          1
+read_alignment           1
+sam_to_sorted_bam        1
+validate_bam             1
+variant_calling          1
+total                    9
+
+Select jobs to execute...
+
+[Fri Jul  4 01:00:01 2025]
+rule bwa_index:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta
+    output: results/raw/reference.fasta.bwt
+    jobid: 9
+    reason: Missing output files: results/raw/reference.fasta.bwt
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:00:02 2025]
+Finished job 9.
+1 of 9 steps (11%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:00:02 2025]
+rule read_alignment:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/raw/SRR1972739.fastq, results/raw/reference.fasta.bwt
+    output: results/aligned/aligned.sam
+    jobid: 8
+    reason: Missing output files: results/aligned/aligned.sam; Input files updated by another job: results/raw/reference.fasta.bwt
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:00:03 2025]
+Finished job 8.
+2 of 9 steps (22%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:00:03 2025]
+rule sam_to_sorted_bam:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sam
+    output: results/aligned/aligned.sorted.bam
+    jobid: 10
+    reason: Missing output files: results/aligned/aligned.sorted.bam; Input files updated by another job: results/aligned/aligned.sam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:00:03 2025]
+Finished job 10.
+3 of 9 steps (33%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:00:03 2025]
+rule validate_bam:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sorted.bam
+    output: results/aligned/validation_report.txt
+    jobid: 11
+    reason: Missing output files: results/aligned/validation_report.txt; Input files updated by another job: results/aligned/aligned.sorted.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:00:06 2025]
+Finished job 11.
+4 of 9 steps (44%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:00:06 2025]
+rule mark_duplicates:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sorted.bam
+    output: results/aligned/dedup.bam, results/aligned/dup_metrics.txt
+    jobid: 12
+    reason: Missing output files: results/aligned/dup_metrics.txt, results/aligned/dedup.bam; Input files updated by another job: results/aligned/aligned.sorted.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:00:10 2025]
+Finished job 12.
+5 of 9 steps (56%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:00:10 2025]
+rule variant_calling:
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam, results/raw/reference.fasta
+    output: results/variants/variants.vcf
+    jobid: 14
+    reason: Missing output files: results/variants/variants.vcf; Input files updated by another job: results/aligned/dedup.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:00:14 2025]
+Error in rule variant_calling:
+    jobid: 14
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam, results/raw/reference.fasta
+    output: results/variants/variants.vcf
+    shell:
+        
+        echo Calling variants...
+        gatk HaplotypeCaller -R results/raw/reference.fasta -I results/aligned/dedup.bam -O results/variants/variants.vcf
+        echo Variants called!
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Removing output files of failed job variant_calling since they might be corrupted:
+results/variants/variants.vcf
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T010001.346592.snakemake.log

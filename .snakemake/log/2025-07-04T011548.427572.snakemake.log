@@ -1,0 +1,13 @@
+Building DAG of jobs...
+AmbiguousRuleException:
+Rules export_snpEff_data and annotate_variants are ambiguous for the file results/annotated/annotated_variants.vcf.
+Consider starting rule output with a unique prefix, constrain your wildcards, or use the ruleorder directive.
+Wildcards:
+	export_snpEff_data: 
+	annotate_variants: 
+Expected input files:
+	export_snpEff_data: results/snakemake/.dirs_created results/variants/filtered_variants.vcf results/snpEff/snpEff.db
+	annotate_variants: results/snakemake/.dirs_created results/variants/filtered_variants.vcf results/snpEff/data/reference_db/snpEff.config
+Expected output files:
+	export_snpEff_data: results/annotated/annotated_variants.vcf
+	annotate_variants: results/annotated/annotated_variants.vcf results/snpEff/snpEff.html

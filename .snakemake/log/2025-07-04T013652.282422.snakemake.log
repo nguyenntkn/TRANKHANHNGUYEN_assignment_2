@@ -1,0 +1,42 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                      count
+---------------------  -------
+all                          1
+annotate_variants            1
+build_snpEff_database        1
+copy_snpeff_config           1
+export_snpEff_data           1
+total                        5
+
+Select jobs to execute...
+
+[Fri Jul  4 01:36:52 2025]
+rule annotate_variants:
+    input: results/snakemake/.dirs_created, results/variants/filtered_variants.vcf, results/snpEff/data/reference_db/snpEff.config
+    output: results/annotated/annotated_variants.vcf, results/snpEff/snpEff.html
+    jobid: 20
+    reason: Missing output files: results/snpEff/snpEff.html, results/annotated/annotated_variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:36:53 2025]
+Error in rule annotate_variants:
+    jobid: 20
+    input: results/snakemake/.dirs_created, results/variants/filtered_variants.vcf, results/snpEff/data/reference_db/snpEff.config
+    output: results/annotated/annotated_variants.vcf, results/snpEff/snpEff.html
+    shell:
+        
+        echo Annotating variants with snpEff...
+        snpEff -c results/snpEff/data/reference_db/snpEff.config -stats results/snpEff/snpEff.html reference_db results/variants/filtered_variants.vcf > results/annotated/annotated_variants.vcf
+        echo Variants annotated with snpEff!
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Removing output files of failed job annotate_variants since they might be corrupted:
+results/annotated/annotated_variants.vcf
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T013652.282422.snakemake.log

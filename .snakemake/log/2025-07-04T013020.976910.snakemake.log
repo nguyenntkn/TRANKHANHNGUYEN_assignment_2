@@ -1,0 +1,127 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                         count
+------------------------  -------
+all                             1
+annotate_variants               1
+build_snpEff_database           1
+copy_reference_to_snpeff        1
+export_snpEff_data              1
+filter_variants                 1
+index_dedup_bam                 1
+mark_duplicates                 1
+sam_to_sorted_bam               1
+snpEff_config_file              1
+validate_bam                    1
+variant_calling                 1
+total                          12
+
+Select jobs to execute...
+
+[Fri Jul  4 01:30:21 2025]
+rule snpEff_config_file:
+    input: results/snakemake/.dirs_created, results/snpEff/data/reference_db/genes.gbk
+    output: results/snpEff/data/reference_db/snpEff.config
+    jobid: 16
+    reason: Code has changed since last execution
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:30:21 2025]
+Finished job 16.
+1 of 12 steps (8%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:30:21 2025]
+rule sam_to_sorted_bam:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sam
+    output: results/aligned/aligned.sorted.bam
+    jobid: 10
+    reason: Updated input files: results/aligned/aligned.sam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:30:22 2025]
+Finished job 10.
+2 of 12 steps (17%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:30:22 2025]
+rule mark_duplicates:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sorted.bam
+    output: results/aligned/dedup.bam, results/aligned/dup_metrics.txt
+    jobid: 12
+    reason: Input files updated by another job: results/aligned/aligned.sorted.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:30:26 2025]
+Finished job 12.
+3 of 12 steps (25%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:30:26 2025]
+rule index_dedup_bam:
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam
+    output: results/aligned/dedup.bam.bai
+    jobid: 13
+    reason: Input files updated by another job: results/aligned/dedup.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:30:26 2025]
+Finished job 13.
+4 of 12 steps (33%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:30:26 2025]
+rule variant_calling:
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam, results/aligned/dedup.bam.bai, results/raw/reference.fasta
+    output: results/variants/variants.vcf
+    jobid: 14
+    reason: Input files updated by another job: results/aligned/dedup.bam.bai, results/aligned/dedup.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:30:51 2025]
+Finished job 14.
+5 of 12 steps (42%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:30:52 2025]
+rule filter_variants:
+    input: results/snakemake/.dirs_created, results/variants/variants.vcf
+    output: results/variants/filtered_variants.vcf
+    jobid: 15
+    reason: Input files updated by another job: results/variants/variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:30:55 2025]
+Finished job 15.
+6 of 12 steps (50%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:30:55 2025]
+rule annotate_variants:
+    input: results/snakemake/.dirs_created, results/variants/filtered_variants.vcf, results/snpEff/data/reference_db/snpEff.config
+    output: results/annotated/annotated_variants.vcf, results/snpEff/snpEff.html
+    jobid: 19
+    reason: Missing output files: results/annotated/annotated_variants.vcf, results/snpEff/snpEff.html; Input files updated by another job: results/snpEff/data/reference_db/snpEff.config, results/variants/filtered_variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:30:55 2025]
+Error in rule annotate_variants:
+    jobid: 19
+    input: results/snakemake/.dirs_created, results/variants/filtered_variants.vcf, results/snpEff/data/reference_db/snpEff.config
+    output: results/annotated/annotated_variants.vcf, results/snpEff/snpEff.html
+    shell:
+        
+        echo Annotating variants with snpEff...
+        snpEff -c results/snpEff/data/reference_db/snpEff.config -stats results/snpEff/snpEff.html reference_db results/variants/filtered_variants.vcf > results/annotated/annotated_variants.vcf
+        echo Variants annotated with snpEff!
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Removing output files of failed job annotate_variants since they might be corrupted:
+results/annotated/annotated_variants.vcf
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T013020.976910.snakemake.log

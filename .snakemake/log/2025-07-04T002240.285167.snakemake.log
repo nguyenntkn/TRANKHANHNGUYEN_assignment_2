@@ -1,0 +1,39 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                   count
+------------------  -------
+all                       1
+download_reference        1
+total                     2
+
+Select jobs to execute...
+
+[Fri Jul  4 00:22:40 2025]
+rule download_reference:
+    input: results/snakemake/.dirs_created
+    output: results/raw/reference.fasta
+    jobid: 2
+    reason: Missing output files: results/raw/reference.fasta
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 00:22:40 2025]
+Error in rule download_reference:
+    jobid: 2
+    input: results/snakemake/.dirs_created
+    output: results/raw/reference.fasta
+    shell:
+        
+        echo Downloading reference genome...
+        efetch -db nucleotide -id AF086833.2 -format fasta > results/raw/reference.fasta
+        echo Downloaded reference genome!
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Removing output files of failed job download_reference since they might be corrupted:
+results/raw/reference.fasta
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T002240.285167.snakemake.log

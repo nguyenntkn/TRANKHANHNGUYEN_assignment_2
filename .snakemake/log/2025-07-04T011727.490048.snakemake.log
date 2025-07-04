@@ -1,0 +1,111 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                       count
+----------------------  -------
+all                           1
+annotate_variants             1
+build_snpEff_database         1
+bwa_index                     1
+create_fasta_dict_gatk        1
+download_reference            1
+export_snpEff_data            1
+filter_variants               1
+index_dedup_bam               1
+index_reference               1
+mark_duplicates               1
+read_alignment                1
+sam_to_sorted_bam             1
+snpEff_config_file            1
+validate_bam                  1
+variant_calling               1
+total                        16
+
+Select jobs to execute...
+
+[Fri Jul  4 01:17:28 2025]
+rule download_reference:
+    input: results/snakemake/.dirs_created
+    output: results/raw/reference.fasta, results/snpEff/data/reference_db/genes.gbk
+    jobid: 2
+    reason: Missing output files: results/snpEff/data/reference_db/genes.gbk; Code has changed since last execution
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:17:29 2025]
+Finished job 2.
+1 of 16 steps (6%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:17:29 2025]
+rule index_reference:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta
+    output: results/raw/reference.fasta.fai
+    jobid: 6
+    reason: Input files updated by another job: results/raw/reference.fasta
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:17:29 2025]
+Finished job 6.
+2 of 16 steps (12%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:17:29 2025]
+rule bwa_index:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta
+    output: results/raw/reference.fasta.bwt
+    jobid: 9
+    reason: Input files updated by another job: results/raw/reference.fasta
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:17:29 2025]
+Finished job 9.
+3 of 16 steps (19%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:17:29 2025]
+rule create_fasta_dict_gatk:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta
+    output: results/raw/reference.dict
+    jobid: 7
+    reason: Input files updated by another job: results/raw/reference.fasta
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:17:32 2025]
+Finished job 7.
+4 of 16 steps (25%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:17:32 2025]
+rule read_alignment:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/raw/SRR1972739.fastq, results/raw/reference.fasta.bwt
+    output: results/aligned/aligned.sam
+    jobid: 8
+    reason: Input files updated by another job: results/raw/reference.fasta, results/raw/reference.fasta.bwt
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 01:17:33 2025]
+Finished job 8.
+5 of 16 steps (31%) done
+Select jobs to execute...
+
+[Fri Jul  4 01:17:33 2025]
+rule snpEff_config_file:
+    input: results/snakemake/.dirs_created, results/snpEff/data/reference_db/genes.gbk
+    output: results/snpEff/data/reference_db/snpEff.config
+    jobid: 16
+    reason: Missing output files: results/snpEff/data/reference_db/snpEff.config; Input files updated by another job: results/snpEff/data/reference_db/genes.gbk
+    resources: tmpdir=/tmp
+
+RuleException in rule snpEff_config_file in file /home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile, line 236:
+NameError: The name 'RAW_DIR/reference' is unknown in this context. Please make sure that you defined that variable. Also note that braces not used for variable access have to be escaped by repeating them, i.e. {{print $1}}, when formatting the following:
+
+        echo Creating custom snpEff configuration file...
+        cat <<EOF > {output.snpEff_config}
+        # Custom snpEff config for reference_db
+        reference_db.genome : reference_db
+        reference_db.fa : $(readlink -f {RAW_DIR/reference.fasta})
+        reference_db.genbank : $(readlink -f {SNPEFF_DATA_DIR}/genes.gbk)
+        EOF
+        

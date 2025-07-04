@@ -1,0 +1,319 @@
+# Variables
+SRA="SRR1972739"
+REF_ID="AF086833.2"
+RESULTS_FOLDER="results"
+RAW_DIR=f"{RESULTS_FOLDER}/raw"
+ALIGNED_DIR=f"{RESULTS_FOLDER}/aligned"
+VARIANT_DIR=f"{RESULTS_FOLDER}/variants"
+ANNOTATED_DIR=f"{RESULTS_FOLDER}/annotated"
+QC_DIR=f"{RESULTS_FOLDER}/qc"
+SNPEFF_DIR=f"{RESULTS_FOLDER}/snpEff"
+SNPEFF_DATA_DIR=f"{SNPEFF_DIR}/data/reference_db"
+SNAKEMAKE_DIR=f"{RESULTS_FOLDER}/snakemake"
+BUCKET="nguyen-binf5506"
+S3_PREFIX="ebola"
+
+rule all:
+    input:
+        f"{SNAKEMAKE_DIR}/.dirs_created",
+        f"{RAW_DIR}/reference.fasta",
+        f"{RAW_DIR}/{SRA}.fastq",
+        f"{QC_DIR}/{SRA}_fastqc.html",
+        f"{RAW_DIR}/reference.fasta.fai",
+        f"{RAW_DIR}/reference.dict",
+        f"{ALIGNED_DIR}/aligned.sam",
+        f"{ALIGNED_DIR}/aligned.sorted.bam",
+        f"{ALIGNED_DIR}/validation_report.txt",
+        f"{ALIGNED_DIR}/dedup.bam",
+        f"{ALIGNED_DIR}/dup_metrics.txt",
+        f"{ALIGNED_DIR}/dedup.bam.bai", 
+        f"{VARIANT_DIR}/variants.vcf",
+        f"{VARIANT_DIR}/filtered_variants.vcf",
+        
+        f"{SNPEFF_DIR}/snpEff.config",
+        f"{SNPEFF_DIR}/snpEff.db",
+        f"{SNPEFF_DATA_DIR}/genes.gbk",
+        f"{SNPEFF_DIR}/snpEff.html",
+        f"{ANNOTATED_DIR}/annotated_variants.vcf",
+        f"{SNPEFF_DIR}/snpEff.dump",
+
+rule create_dirs:
+    output:
+        marker = f"{SNAKEMAKE_DIR}/.dirs_created"
+    shell:
+        """
+        mkdir -p {RAW_DIR} {ALIGNED_DIR} {VARIANT_DIR} {ANNOTATED_DIR} {QC_DIR} {SNPEFF_DATA_DIR}
+        touch {output.marker}
+        """
+
+
+rule download_reference:
+    input:
+        marker = rules.create_dirs.output.marker
+    output:
+        reference_fasta = f"{RAW_DIR}/reference.fasta",
+        reference_gbk = f"{SNPEFF_DATA_DIR}/genes.gbk",
+    shell:
+        """
+        echo Downloading reference genome...
+        efetch -db nucleotide -id {REF_ID} -format fasta > {output.reference_fasta}
+        efetch -db nucleotide -id {REF_ID} -format genbank > {output.reference_gbk}
+        echo Downloaded reference genome!
+        """
+rule download_sra:
+    input:
+        marker = rules.create_dirs.output.marker
+    output:
+        sequence_sra = f"{RAW_DIR}/{SRA}/{SRA}.sra"
+    shell:
+        """
+        echo Downloading sequencing data...
+        prefetch {SRA} -O {RAW_DIR}
+        echo Downloaded sequencing data!
+        """
+
+rule extract_sequence:
+    input:
+        marker = rules.create_dirs.output.marker,
+        sequence_sra = rules.download_sra.output.sequence_sra,
+    output:
+        sequence_fastq = f"{RAW_DIR}/{SRA}.fastq"
+    shell:
+        """
+        echo Extracting sequencing data...
+        fastq-dump -X 10000 {RAW_DIR}/{SRA}/{SRA}.sra -O {RAW_DIR}
+        echo Extracted sequencing data!
+        """
+
+rule fastqc_raw_reads:
+    input:
+        marker = rules.create_dirs.output.marker,
+        sequence_fastq = rules.extract_sequence.output.sequence_fastq,
+    output:
+        fastqc_report = f"{QC_DIR}/{SRA}_fastqc.html"
+    shell:
+        """
+        echo Running FastQC on raw reads...
+        fastqc -o {QC_DIR} {input.sequence_fastq}
+        echo FastQC completed!
+        """
+
+rule index_reference:
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+    output:
+        reference_fasta_index = f"{RAW_DIR}/reference.fasta.fai",
+    shell:
+        """
+        echo Indexing reference genome...
+        samtools faidx {input.reference_fasta}
+        echo Indexed reference genome!
+        """
+
+rule bwa_index:
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+    output:
+        index_bwa = f"{RAW_DIR}/reference.fasta.bwt",
+    shell:
+        """
+        echo Building BWA index...
+        bwa index {input.reference_fasta}   
+        """
+
+rule create_fasta_dict_gatk: 
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+    output:
+        fasta_dict = f"{RAW_DIR}/reference.dict"
+    shell:
+        """
+        echo Creating FASTA dictionary using GATK...
+        gatk CreateSequenceDictionary -R {input.reference_fasta} -O {output.fasta_dict}
+        echo Created FASTA dictionary!
+        """
+
+rule read_alignment:
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+        sequence_fastq = rules.extract_sequence.output.sequence_fastq,
+        bwa_index = rules.bwa_index.output.index_bwa,
+
+    output:
+        aligned_sam = f"{ALIGNED_DIR}/aligned.sam"
+    shell:
+        """
+        echo Aligning reads with read groups...
+        bwa mem -R '@RG\\tID:1\\tLB:lib1\\tPL:illumina\\tPU:unit1\\tSM:sample1' {input.reference_fasta} {input.sequence_fastq} > {output.aligned_sam}
+        echo Aligned reads!
+        """
+
+rule sam_to_sorted_bam:
+    input:
+        marker = rules.create_dirs.output.marker,
+        aligned_sam = rules.read_alignment.output.aligned_sam,
+    output: 
+        sorted_bam = f"{ALIGNED_DIR}/aligned.sorted.bam"
+    shell:
+        """
+        echo Converting SAM to sorted BAM...
+        samtools view -b {input.aligned_sam} | samtools sort -o {output.sorted_bam}
+        echo Converted SAM to sorted BAM!
+        """ 
+
+rule validate_bam:
+    input:
+        marker = rules.create_dirs.output.marker,
+        sorted_bam = rules.sam_to_sorted_bam.output.sorted_bam,
+    output:
+        validation_report = f"{ALIGNED_DIR}/validation_report.txt"
+    shell:
+        """
+        echo Validating BAM file...
+        gatk ValidateSamFile -I {input.sorted_bam} -MODE SUMMARY > {output.validation_report}
+        echo BAM file validation completed!
+        """
+
+rule mark_duplicates:   
+    input:
+        marker = rules.create_dirs.output.marker,
+        sorted_bam = rules.sam_to_sorted_bam.output.sorted_bam,
+    output:
+        dedup_bam = f"{ALIGNED_DIR}/dedup.bam",
+        metrics_txt = f"{ALIGNED_DIR}/dup_metrics.txt"
+    shell:
+        """
+        echo Marking duplicates...
+        gatk MarkDuplicates -I {input.sorted_bam} -O {output.dedup_bam} -M {output.metrics_txt}
+        echo Duplicates marked!
+        """
+
+rule index_dedup_bam:   
+    input:
+        marker = rules.create_dirs.output.marker,
+        dedup_bam = rules.mark_duplicates.output.dedup_bam,
+    output:
+        dedup_bam_index = f"{ALIGNED_DIR}/dedup.bam.bai"
+    shell:
+        """
+        echo Indexing deduplicated BAM file...
+        samtools index {input.dedup_bam}
+        echo Indexed deduplicated BAM file!
+        """ 
+
+rule variant_calling:
+    input:
+        marker = rules.create_dirs.output.marker,
+        dedup_bam = rules.mark_duplicates.output.dedup_bam,
+        dedup_bam_index = rules.index_dedup_bam.output.dedup_bam_index,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+    output:
+        variants_vcf = f"{VARIANT_DIR}/variants.vcf"
+    shell:
+        """
+        echo Calling variants...
+        mkdir -p {VARIANT_DIR}
+        gatk HaplotypeCaller -R {input.reference_fasta} -I {input.dedup_bam} -O {output.variants_vcf}
+        echo Variants called!
+        """ 
+
+rule filter_variants:
+    input:
+        marker = rules.create_dirs.output.marker,
+        variants_vcf = rules.variant_calling.output.variants_vcf,
+    output:
+        filtered_variants_vcf = f"{VARIANT_DIR}/filtered_variants.vcf"
+    shell:
+        """
+        echo Filtering variants...
+        gatk VariantFiltration -R {rules.download_reference.output.reference_fasta} -V {input.variants_vcf} -O {output.filtered_variants_vcf} --filter-expression "QD < 2.0 || FS > 60.0" --filter-name FILTER
+        echo Variants filtered!
+        """ 
+
+rule copy_reference_to_snpeff:
+    input:
+        reference_fasta = rules.download_reference.output.reference_fasta
+    output:
+        copied_reference_fasta = f"{SNPEFF_DATA_DIR}/reference.fasta"
+    shell:
+        """
+        cp {input.reference_fasta} {output.copied_reference_fasta}
+        """
+
+rule snpEff_config_file:
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_gbk = rules.download_reference.output.reference_gbk,
+    output:
+        snpEff_config = f"{SNPEFF_DATA_DIR}/snpEff.config"
+    shell:
+        r"""
+        echo Creating custom snpEff configuration file...
+        cat <<EOF > {output.snpEff_config}
+# Custom snpEff config for reference_db
+reference_db.genome : reference_db
+reference_db.fa : reference.fasta
+reference_db.genbank : genes.gbk
+EOF
+        """
+
+rule copy_snpeff_config:
+    input:
+        config_source = rules.snpEff_config_file.output.snpEff_config
+    output:
+        config_target = f"{SNPEFF_DIR}/snpEff.config"
+    shell:
+        """
+        cp {input.config_source} {output.config_target}
+        """
+
+rule build_snpEff_database:
+    input:
+        marker = rules.create_dirs.output.marker,
+        snpEff_config = rules.copy_snpeff_config.output.config_target,
+        reference_fasta = rules.copy_reference_to_snpeff.output.copied_reference_fasta,
+        reference_gbk = rules.download_reference.output.reference_gbk,
+    output:
+        snpEff_db = f"{SNPEFF_DIR}/snpEff.db"
+    shell:
+        """
+        echo Building snpEff database...
+        snpEff build -c {input.snpEff_config} -genbank -v -noCheckProtein reference_db
+        echo snpEff database built!
+        """
+
+rule export_snpEff_data:
+    input:
+        marker = rules.create_dirs.output.marker,
+        filtered_variants_vcf = rules.filter_variants.output.filtered_variants_vcf,
+        snpEff_db = rules.build_snpEff_database.output.snpEff_db,
+        snpEff_config = rules.copy_snpeff_config.output.config_target,
+    output:
+        snpeff_dump = f"{SNPEFF_DIR}/snpEff.dump"
+    shell:
+        """
+        echo Exporting snpEff database...
+        snpEff dump -c {input.snpEff_config} reference_db > {output.snpeff_dump}
+        echo Exported snpEff database!
+        """
+
+rule annotate_variants:
+    input:
+        marker = rules.create_dirs.output.marker,       
+        filtered_variants_vcf = rules.filter_variants.output.filtered_variants_vcf,
+        snpEff_config = rules.snpEff_config_file.output.snpEff_config,
+    output:
+        annotated_vcf = f"{ANNOTATED_DIR}/annotated_variants.vcf",
+        snpEff_stats = f"{SNPEFF_DIR}/snpEff.html",
+    shell:
+        """
+        echo Annotating variants with snpEff...
+        snpEff -c {input.snpEff_config} -stats {output.snpEff_stats} reference_db {input.filtered_variants_vcf} > {output.annotated_vcf}
+        echo Variants annotated with snpEff!
+        """ 
+
+ 
