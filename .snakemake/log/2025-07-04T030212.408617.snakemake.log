@@ -1,0 +1,3 @@
+WorkflowError in file /home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile, line 274:
+Rule build_snpEff_database is not defined in this workflow. Available rules: all, create_dirs, download_reference, download_sra, extract_sequence, fastqc_raw_reads, index_reference, bwa_index, create_fasta_dict_gatk, read_alignment, sam_to_sorted_bam, validate_bam, mark_duplicates, index_dedup_bam, variant_calling, filter_variants, copy_reference_fasta, snpEff_config_file
+  File "/home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile", line 274, in <module>

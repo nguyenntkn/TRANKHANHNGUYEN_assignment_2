@@ -1,0 +1,3 @@
+NameError in file /home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile, line 24:
+name 'ext' is not defined
+  File "/home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile", line 24, in <module>

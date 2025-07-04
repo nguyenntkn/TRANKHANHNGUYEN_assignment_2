@@ -1,0 +1,87 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                      count
+---------------------  -------
+all                          1
+annotate_variants            1
+build_snpEff_database        1
+bwa_index                    1
+export_snpEff_data           1
+filter_variants              1
+index_dedup_bam              1
+mark_duplicates              1
+read_alignment               1
+sam_to_sorted_bam            1
+snpEff_config_file           1
+validate_bam                 1
+variant_calling              1
+total                       13
+
+Select jobs to execute...
+
+[Fri Jul  4 02:29:14 2025]
+rule snpEff_config_file:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/snpEff/data/reference_db/genes.gbk
+    output: results/snpEff/data/reference_db/snpEff.config
+    jobid: 16
+    reason: Missing output files: results/snpEff/data/reference_db/snpEff.config
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:29:15 2025]
+Finished job 16.
+1 of 13 steps (8%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:29:15 2025]
+rule bwa_index:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta
+    output: results/raw/reference.fasta.bwt
+    jobid: 9
+    reason: Missing output files: results/raw/reference.fasta.bwt
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:29:15 2025]
+Finished job 9.
+2 of 13 steps (15%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:29:15 2025]
+rule read_alignment:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/raw/SRR1972739.fastq, results/raw/reference.fasta.bwt
+    output: results/aligned/aligned.sam
+    jobid: 8
+    reason: Missing output files: results/aligned/aligned.sam; Input files updated by another job: results/raw/reference.fasta.bwt
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:29:17 2025]
+Finished job 8.
+3 of 13 steps (23%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:29:17 2025]
+rule build_snpEff_database:
+    input: results/snakemake/.dirs_created, results/snpEff/data/reference_db/snpEff.config
+    output: results/snpEff/snpEff.db
+    jobid: 17
+    reason: Missing output files: results/snpEff/snpEff.db; Input files updated by another job: results/snpEff/data/reference_db/snpEff.config
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:29:17 2025]
+Error in rule build_snpEff_database:
+    jobid: 17
+    input: results/snakemake/.dirs_created, results/snpEff/data/reference_db/snpEff.config
+    output: results/snpEff/snpEff.db
+    shell:
+        
+        echo Building snpEff database...
+        snpEff build -c results/snpEff/data/reference_db/snpEff.config -genbank -v -noCheckProtein reference_db
+        echo snpEff database built!
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T022914.155044.snakemake.log

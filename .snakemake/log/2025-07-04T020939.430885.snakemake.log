@@ -1,0 +1,105 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                         count
+------------------------  -------
+all                             1
+annotate_variants               1
+build_snpEff_database           1
+bwa_index                       1
+copy_reference_to_snpeff        1
+export_snpEff_data              1
+filter_variants                 1
+index_dedup_bam                 1
+mark_duplicates                 1
+read_alignment                  1
+sam_to_sorted_bam               1
+snpEff_config_file              1
+validate_bam                    1
+variant_calling                 1
+total                          14
+
+Select jobs to execute...
+
+[Fri Jul  4 02:09:40 2025]
+rule copy_reference_to_snpeff:
+    input: results/raw/reference.fasta
+    output: results/snpEff/data/reference_db/reference.fasta
+    jobid: 18
+    reason: Missing output files: results/snpEff/data/reference_db/reference.fasta
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:09:40 2025]
+Finished job 18.
+1 of 14 steps (7%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:09:40 2025]
+rule bwa_index:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta
+    output: results/raw/reference.fasta.bwt
+    jobid: 9
+    reason: Missing output files: results/raw/reference.fasta.bwt
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:09:40 2025]
+Finished job 9.
+2 of 14 steps (14%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:09:40 2025]
+rule snpEff_config_file:
+    input: results/snakemake/.dirs_created, results/snpEff/data/reference_db/genes.gbk
+    output: results/snpEff/snpEff.config
+    jobid: 17
+    reason: Missing output files: results/snpEff/snpEff.config; Set of input files has changed since last execution; Code has changed since last execution
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:09:40 2025]
+Finished job 17.
+3 of 14 steps (21%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:09:40 2025]
+rule read_alignment:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/raw/SRR1972739.fastq, results/raw/reference.fasta.bwt
+    output: results/aligned/aligned.sam
+    jobid: 8
+    reason: Missing output files: results/aligned/aligned.sam; Input files updated by another job: results/raw/reference.fasta.bwt
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:09:41 2025]
+Finished job 8.
+4 of 14 steps (29%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:09:41 2025]
+rule sam_to_sorted_bam:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sam
+    output: results/aligned/aligned.sorted.bam
+    jobid: 10
+    reason: Missing output files: results/aligned/aligned.sorted.bam; Input files updated by another job: results/aligned/aligned.sam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:09:42 2025]
+Finished job 10.
+5 of 14 steps (36%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:09:42 2025]
+rule build_snpEff_database:
+    input: results/snakemake/.dirs_created, results/snpEff/snpEff.config, results/snpEff/data/reference_db/reference.fasta, results/snpEff/data/reference_db/genes.gbk
+    output: results/snpEff/snpEff.db
+    jobid: 16
+    reason: Missing output files: results/snpEff/snpEff.db; Input files updated by another job: results/snpEff/snpEff.config, results/snpEff/data/reference_db/reference.fasta
+    resources: tmpdir=/tmp
+
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule build_snpEff_database in file /home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile, line 263:
+Job 16  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+results/snpEff/snpEff.db
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T020939.430885.snakemake.log

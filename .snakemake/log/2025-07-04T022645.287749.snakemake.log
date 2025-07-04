@@ -1,0 +1,44 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                      count
+---------------------  -------
+all                          1
+annotate_variants            1
+build_snpEff_database        1
+bwa_index                    1
+export_snpEff_data           1
+filter_variants              1
+index_dedup_bam              1
+mark_duplicates              1
+read_alignment               1
+sam_to_sorted_bam            1
+snpEff_config_file           1
+validate_bam                 1
+variant_calling              1
+total                       13
+
+Select jobs to execute...
+
+[Fri Jul  4 02:26:45 2025]
+rule snpEff_config_file:
+    input: results/snakemake/.dirs_created, results/snpEff/data/reference_db/genes.gbk
+    output: results/snpEff/data/reference_db/snpEff.config
+    jobid: 16
+    reason: Code has changed since last execution
+    resources: tmpdir=/tmp
+
+RuleException in rule snpEff_config_file in file /home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile, line 234:
+AttributeError: module 'posixpath' has no attribute 'abspath(input', when formatting the following:
+
+        echo Creating custom snpEff configuration file...
+        cat <<EOF > {output.snpEff_config}
+# Custom snpEff config for reference_db
+database.repository = {SNPEFF_DIR}/data
+reference_db.genome : reference_db
+reference_db.fa : {os.path.abspath(input.reference_fasta)}
+reference_db.genbank : {os.path.abspath(input.reference_gbk)}
+EOF
+        

@@ -29,9 +29,8 @@ rule all:
         f"{ALIGNED_DIR}/dedup.bam.bai", 
         f"{VARIANT_DIR}/variants.vcf",
         f"{VARIANT_DIR}/filtered_variants.vcf",
-        
-        f"{SNPEFF_DIR}/snpEff.config",
-        f"{SNPEFF_DIR}/snpEff.db",
+        f"{SNPEFF_DATA_DIR}/snpEff.config",
+        f"{SNPEFF_DATA_DIR}/.build_done",
         f"{SNPEFF_DATA_DIR}/genes.gbk",
         f"{SNPEFF_DIR}/snpEff.html",
         f"{ANNOTATED_DIR}/annotated_variants.vcf",
@@ -45,8 +44,6 @@ rule create_dirs:
         mkdir -p {RAW_DIR} {ALIGNED_DIR} {VARIANT_DIR} {ANNOTATED_DIR} {QC_DIR} {SNPEFF_DATA_DIR}
         touch {output.marker}
         """
-
-
 rule download_reference:
     input:
         marker = rules.create_dirs.output.marker
@@ -233,65 +230,65 @@ rule filter_variants:
         gatk VariantFiltration -R {rules.download_reference.output.reference_fasta} -V {input.variants_vcf} -O {output.filtered_variants_vcf} --filter-expression "QD < 2.0 || FS > 60.0" --filter-name FILTER
         echo Variants filtered!
         """ 
-
-rule copy_reference_to_snpeff:
+rule copy_reference_fasta:
     input:
-        reference_fasta = rules.download_reference.output.reference_fasta
+        fasta = rules.download_reference.output.reference_fasta
     output:
-        copied_reference_fasta = f"{SNPEFF_DATA_DIR}/reference.fasta"
+        fasta_copy = f"{SNPEFF_DATA_DIR}/reference.fasta"
     shell:
         """
-        cp {input.reference_fasta} {output.copied_reference_fasta}
+        cp {input.fasta} {output.fasta_copy}
         """
 
 rule snpEff_config_file:
     input:
         marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.copy_reference_fasta.output.fasta_copy,
         reference_gbk = rules.download_reference.output.reference_gbk,
     output:
-        snpEff_config = f"{SNPEFF_DATA_DIR}/snpEff.config"
+        snpEff_config = f"{SNPEFF_DIR}/snpEff.config"
     shell:
         r"""
-        echo Creating custom snpEff configuration file...
+        echo Creating snpEff config file...
+
+        # Resolve absolute paths here using shell commands
+        REF_FASTA_ABS=$(readlink -f {RAW_DIR}/reference.fasta)
+        REF_GBK_ABS=$(readlink -f {SNPEFF_DATA_DIR}/genes.gbk)
+
         cat <<EOF > {output.snpEff_config}
 # Custom snpEff config for reference_db
 reference_db.genome : reference_db
-reference_db.fa : reference.fasta
-reference_db.genbank : genes.gbk
+reference_db.fa : $REF_FASTA_ABS
+reference_db.genbank : $REF_GBK_ABS
 EOF
+
+        echo snpEff config file created!
         """
 
-rule copy_snpeff_config:
-    input:
-        config_source = rules.snpEff_config_file.output.snpEff_config
-    output:
-        config_target = f"{SNPEFF_DIR}/snpEff.config"
-    shell:
-        """
-        cp {input.config_source} {output.config_target}
-        """
+
+        
 
 rule build_snpEff_database:
     input:
         marker = rules.create_dirs.output.marker,
-        snpEff_config = rules.copy_snpeff_config.output.config_target,
-        reference_fasta = rules.copy_reference_to_snpeff.output.copied_reference_fasta,
-        reference_gbk = rules.download_reference.output.reference_gbk,
+        snpEff_config = rules.snpEff_config_file.output.snpEff_config,
     output:
-        snpEff_db = f"{SNPEFF_DIR}/snpEff.db"
+        snpEff_done = f"{SNPEFF_DATA_DIR}/.build_done"
     shell:
         """
         echo Building snpEff database...
         snpEff build -c {input.snpEff_config} -genbank -v -noCheckProtein reference_db
+        touch {output.snpEff_done}
         echo snpEff database built!
         """
+
 
 rule export_snpEff_data:
     input:
         marker = rules.create_dirs.output.marker,
         filtered_variants_vcf = rules.filter_variants.output.filtered_variants_vcf,
-        snpEff_db = rules.build_snpEff_database.output.snpEff_db,
-        snpEff_config = rules.copy_snpeff_config.output.config_target,
+        snpEff_done = rules.build_snpEff_database.output.snpEff_done,
+        snpEff_config = rules.snpEff_config_file.output.snpEff_config,
     output:
         snpeff_dump = f"{SNPEFF_DIR}/snpEff.dump"
     shell:
@@ -301,10 +298,12 @@ rule export_snpEff_data:
         echo Exported snpEff database!
         """
 
+
 rule annotate_variants:
     input:
         marker = rules.create_dirs.output.marker,       
         filtered_variants_vcf = rules.filter_variants.output.filtered_variants_vcf,
+        
         snpEff_config = rules.snpEff_config_file.output.snpEff_config,
     output:
         annotated_vcf = f"{ANNOTATED_DIR}/annotated_variants.vcf",

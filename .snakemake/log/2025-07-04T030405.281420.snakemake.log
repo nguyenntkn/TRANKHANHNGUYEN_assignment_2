@@ -1,0 +1,135 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                      count
+---------------------  -------
+all                          1
+annotate_variants            1
+build_snpEff_database        1
+export_snpEff_data           1
+filter_variants              1
+index_dedup_bam              1
+mark_duplicates              1
+validate_bam                 1
+variant_calling              1
+total                        9
+
+Select jobs to execute...
+
+[Fri Jul  4 03:04:05 2025]
+rule build_snpEff_database:
+    input: results/snakemake/.dirs_created, results/snpEff/snpEff.config
+    output: results/snpEff/data/reference_db/.build_done
+    jobid: 16
+    reason: Missing output files: results/snpEff/data/reference_db/.build_done
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:06 2025]
+Finished job 16.
+1 of 9 steps (11%) done
+Select jobs to execute...
+
+[Fri Jul  4 03:04:06 2025]
+rule validate_bam:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sorted.bam
+    output: results/aligned/validation_report.txt
+    jobid: 11
+    reason: Missing output files: results/aligned/validation_report.txt
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:09 2025]
+Finished job 11.
+2 of 9 steps (22%) done
+Select jobs to execute...
+
+[Fri Jul  4 03:04:09 2025]
+rule mark_duplicates:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sorted.bam
+    output: results/aligned/dedup.bam, results/aligned/dup_metrics.txt
+    jobid: 12
+    reason: Missing output files: results/aligned/dup_metrics.txt, results/aligned/dedup.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:14 2025]
+Finished job 12.
+3 of 9 steps (33%) done
+Select jobs to execute...
+
+[Fri Jul  4 03:04:14 2025]
+rule index_dedup_bam:
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam
+    output: results/aligned/dedup.bam.bai
+    jobid: 13
+    reason: Missing output files: results/aligned/dedup.bam.bai; Input files updated by another job: results/aligned/dedup.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:14 2025]
+Finished job 13.
+4 of 9 steps (44%) done
+Select jobs to execute...
+
+[Fri Jul  4 03:04:14 2025]
+rule variant_calling:
+    input: results/snakemake/.dirs_created, results/aligned/dedup.bam, results/aligned/dedup.bam.bai, results/raw/reference.fasta
+    output: results/variants/variants.vcf
+    jobid: 14
+    reason: Missing output files: results/variants/variants.vcf; Input files updated by another job: results/aligned/dedup.bam.bai, results/aligned/dedup.bam
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:40 2025]
+Finished job 14.
+5 of 9 steps (56%) done
+Select jobs to execute...
+
+[Fri Jul  4 03:04:40 2025]
+rule filter_variants:
+    input: results/snakemake/.dirs_created, results/variants/variants.vcf
+    output: results/variants/filtered_variants.vcf
+    jobid: 15
+    reason: Missing output files: results/variants/filtered_variants.vcf; Input files updated by another job: results/variants/variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:43 2025]
+Finished job 15.
+6 of 9 steps (67%) done
+Select jobs to execute...
+
+[Fri Jul  4 03:04:43 2025]
+rule annotate_variants:
+    input: results/snakemake/.dirs_created, results/variants/filtered_variants.vcf, results/snpEff/snpEff.config
+    output: results/annotated/annotated_variants.vcf, results/snpEff/snpEff.html
+    jobid: 19
+    reason: Missing output files: results/snpEff/snpEff.html, results/annotated/annotated_variants.vcf; Input files updated by another job: results/variants/filtered_variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:45 2025]
+Finished job 19.
+7 of 9 steps (78%) done
+Select jobs to execute...
+
+[Fri Jul  4 03:04:45 2025]
+rule export_snpEff_data:
+    input: results/snakemake/.dirs_created, results/variants/filtered_variants.vcf, results/snpEff/data/reference_db/.build_done, results/snpEff/snpEff.config
+    output: results/snpEff/snpEff.dump
+    jobid: 20
+    reason: Missing output files: results/snpEff/snpEff.dump; Input files updated by another job: results/snpEff/data/reference_db/.build_done, results/variants/filtered_variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:46 2025]
+Finished job 20.
+8 of 9 steps (89%) done
+Select jobs to execute...
+
+[Fri Jul  4 03:04:46 2025]
+localrule all:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/raw/SRR1972739.fastq, results/qc/SRR1972739_fastqc.html, results/raw/reference.fasta.fai, results/raw/reference.dict, results/aligned/aligned.sam, results/aligned/aligned.sorted.bam, results/aligned/validation_report.txt, results/aligned/dedup.bam, results/aligned/dup_metrics.txt, results/aligned/dedup.bam.bai, results/variants/variants.vcf, results/variants/filtered_variants.vcf, results/snpEff/data/reference_db/snpEff.config, results/snpEff/data/reference_db/.build_done, results/snpEff/data/reference_db/genes.gbk, results/snpEff/snpEff.html, results/annotated/annotated_variants.vcf, results/snpEff/snpEff.dump
+    jobid: 0
+    reason: Input files updated by another job: results/aligned/dup_metrics.txt, results/aligned/dedup.bam.bai, results/snpEff/snpEff.dump, results/variants/variants.vcf, results/snpEff/snpEff.html, results/aligned/dedup.bam, results/aligned/validation_report.txt, results/snpEff/data/reference_db/.build_done, results/variants/filtered_variants.vcf, results/annotated/annotated_variants.vcf
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 03:04:46 2025]
+Finished job 0.
+9 of 9 steps (100%) done
+Complete log: .snakemake/log/2025-07-04T030405.281420.snakemake.log

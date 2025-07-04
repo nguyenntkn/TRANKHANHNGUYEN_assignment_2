@@ -1,0 +1,59 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                         count
+------------------------  -------
+all                             1
+annotate_variants               1
+build_snpEff_database           1
+copy_reference_to_snpeff        1
+copy_snpeff_config              1
+create_fasta_dict_gatk          1
+download_reference              1
+download_sra                    1
+export_snpEff_data              1
+extract_sequence                1
+fastqc_raw_reads                1
+filter_variants                 1
+index_dedup_bam                 1
+index_reference                 1
+mark_duplicates                 1
+read_alignment                  1
+sam_to_sorted_bam               1
+snpEff_config_file              1
+validate_bam                    1
+variant_calling                 1
+total                          20
+
+Select jobs to execute...
+
+[Fri Jul  4 02:05:11 2025]
+rule download_sra:
+    input: results/snakemake/.dirs_created
+    output: results/raw/SRR1972739/SRR1972739.sra
+    jobid: 4
+    reason: Missing output files: results/raw/SRR1972739/SRR1972739.sra
+    resources: tmpdir=/tmp
+
+[Fri Jul  4 02:05:13 2025]
+Finished job 4.
+1 of 20 steps (5%) done
+Select jobs to execute...
+
+[Fri Jul  4 02:05:13 2025]
+rule extract_sequence:
+    input: results/raw/SRR1972739/SRR1972739.sra
+    output: results/raw/SRR1972739.fastq
+    jobid: 3
+    reason: Missing output files: results/raw/SRR1972739.fastq; Input files updated by another job: results/raw/SRR1972739/SRR1972739.sra; Set of input files has changed since last execution; Code has changed since last execution
+    resources: tmpdir=/tmp
+
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule extract_sequence in file /home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile, line 77:
+Job 3  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+results/raw/SRR1972739.fastq
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T020510.813228.snakemake.log

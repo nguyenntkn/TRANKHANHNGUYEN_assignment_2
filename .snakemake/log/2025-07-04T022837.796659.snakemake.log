@@ -1,0 +1,35 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                      count
+---------------------  -------
+all                          1
+annotate_variants            1
+build_snpEff_database        1
+bwa_index                    1
+export_snpEff_data           1
+filter_variants              1
+index_dedup_bam              1
+mark_duplicates              1
+read_alignment               1
+sam_to_sorted_bam            1
+snpEff_config_file           1
+validate_bam                 1
+variant_calling              1
+total                       13
+
+Select jobs to execute...
+
+[Fri Jul  4 02:28:38 2025]
+rule snpEff_config_file:
+    input: results/snakemake/.dirs_created, results/snpEff/data/reference_db/genes.gbk
+    output: results/snpEff/data/reference_db/snpEff.config
+    jobid: 16
+    reason: Code has changed since last execution
+    resources: tmpdir=/tmp
+
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-04T022837.796659.snakemake.log
