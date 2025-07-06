@@ -18,7 +18,8 @@ rule all:
         f"{SNAKEMAKE_DIR}/.dirs_created",
         f"{RAW_DIR}/reference.fasta",
         f"{SNPEFF_DATA_DIR}/genes.gbk",
-        f"{RAW_DIR}/{SRA}/{SRA}.sra"
+        f"{RAW_DIR}/{SRA}/{SRA}.sra",
+        f"{RAW_DIR}/{SRA}.fastq",
 
 
 rule create_dirs:
@@ -54,5 +55,18 @@ rule download_sra:
         echo Downloading sequencing data...
         prefetch {SRA} -O {RAW_DIR}
         echo Downloaded sequencing data!
+        """
+
+rule extract_sequence:
+    input:
+        marker = rules.create_dirs.output.marker,
+        sequence_sra = rules.download_sra.output.sequence_sra,
+    output:
+        sequence_fastq = f"{RAW_DIR}/{SRA}.fastq"
+    shell:
+        """
+        echo Extracting sequencing data...
+        fastq-dump -X 10000 {RAW_DIR}/{SRA}/{SRA}.sra -O {RAW_DIR}
+        echo Extracted sequencing data!
         """
 
