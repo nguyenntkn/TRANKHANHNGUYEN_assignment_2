@@ -22,6 +22,8 @@ rule all:
         f"{RAW_DIR}/{SRA}.fastq",
         f"{QC_DIR}/{SRA}_fastqc.html",
         f"{RAW_DIR}/reference.fasta.fai",
+        f"{RAW_DIR}/reference.fasta.bwt",
+
 
 
 rule create_dirs:
@@ -96,4 +98,16 @@ rule index_reference:
         echo Indexing reference genome...
         samtools faidx {input.reference_fasta}
         echo Indexed reference genome!
+        """
+
+rule bwa_index:
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+    output:
+        index_bwa = f"{RAW_DIR}/reference.fasta.bwt",
+    shell:
+        """
+        echo Building BWA index...
+        bwa index {input.reference_fasta}   
         """
