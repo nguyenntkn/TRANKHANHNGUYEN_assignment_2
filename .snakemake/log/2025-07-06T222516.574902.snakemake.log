@@ -1,0 +1,37 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job             count
+------------  -------
+all                 1
+validate_bam        1
+total               2
+
+Select jobs to execute...
+
+[Sun Jul  6 22:25:17 2025]
+rule validate_bam:
+    input: results/snakemake/.dirs_created, results/aligned/aligned.sorted.bam
+    output: results/aligned/validation_report.txt
+    jobid: 11
+    reason: Missing output files: results/aligned/validation_report.txt
+    resources: tmpdir=/tmp
+
+[Sun Jul  6 22:25:20 2025]
+Finished job 11.
+1 of 2 steps (50%) done
+Select jobs to execute...
+
+[Sun Jul  6 22:25:20 2025]
+localrule all:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/snpEff/data/reference_db/genes.gbk, results/raw/SRR1972739/SRR1972739.sra, results/raw/SRR1972739.fastq, results/qc/SRR1972739_fastqc.html, results/raw/reference.fasta.fai, results/raw/reference.fasta.bwt, results/raw/reference.dict, results/aligned/aligned.sam, results/aligned/aligned.sorted.bam, results/aligned/validation_report.txt
+    jobid: 0
+    reason: Input files updated by another job: results/aligned/validation_report.txt
+    resources: tmpdir=/tmp
+
+[Sun Jul  6 22:25:20 2025]
+Finished job 0.
+2 of 2 steps (100%) done
+Complete log: .snakemake/log/2025-07-06T222516.574902.snakemake.log

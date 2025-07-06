@@ -26,6 +26,7 @@ rule all:
         f"{RAW_DIR}/reference.dict",
         f"{ALIGNED_DIR}/aligned.sam",
         f"{ALIGNED_DIR}/aligned.sorted.bam",
+        f"{ALIGNED_DIR}/validation_report.txt",
 
 
 
@@ -155,3 +156,16 @@ rule sam_to_sorted_bam:
         samtools view -b {input.aligned_sam} | samtools sort -o {output.sorted_bam}
         echo Converted SAM to sorted BAM!
         """ 
+
+rule validate_bam:
+    input:
+        marker = rules.create_dirs.output.marker,
+        sorted_bam = rules.sam_to_sorted_bam.output.sorted_bam,
+    output:
+        validation_report = f"{ALIGNED_DIR}/validation_report.txt"
+    shell:
+        """
+        echo Validating BAM file...
+        gatk ValidateSamFile -I {input.sorted_bam} -MODE SUMMARY > {output.validation_report}
+        echo BAM file validation completed!
+        """
