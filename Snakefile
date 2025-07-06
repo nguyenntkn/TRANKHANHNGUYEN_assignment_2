@@ -37,6 +37,7 @@ rule all:
         f"{SNPEFF_DIR}/snpEff.dump",
         f"{ANNOTATED_DIR}/annotated_variants.vcf",
         f"{SNPEFF_DIR}/snpEff.html",
+        f"{SNAKEMAKE_DIR}/.s3_upload",
 
 
 
@@ -313,3 +314,31 @@ rule annotate_variants:
         snpEff -c {input.snpEff_config} -stats {output.snpEff_stats} reference_db {input.filtered_variants_vcf} > {output.annotated_vcf}
         echo Variants annotated with snpEff!
         """ 
+
+rule upload_s3:
+    input:
+        reference_fasta = rules.download_reference.output.reference_fasta,
+        snpEff_dump = rules.export_snpEff_data.output.snpeff_dump,
+        annotated_vcf = rules.annotate_variants.output.annotated_vcf,
+    output:
+        marker = f"{SNAKEMAKE_DIR}/.s3_upload"
+    run: 
+        import boto3
+        import os
+
+        s3 = boto3.client('s3')
+
+
+        # Upload all files in RESULTS_FOLDER to S3
+        for root, dirs, files in os.walk(RESULTS_FOLDER):
+            for file in files:
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, RESULTS_FOLDER)
+                s3_key = os.path.join(S3_PREFIX, relative_path).replace("\\", "/")  # Ensure forward slashes for S3
+                
+                print(f"Uploading {file_path} to s3://{BUCKET}/{s3_key}")
+                s3.upload_file(file_path, BUCKET, s3_key)
+
+        # Create marker file to indicate upload completion
+        with open(output.marker, 'w') as f:
+            f.write("Upload completed!")
