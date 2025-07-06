@@ -32,6 +32,7 @@ rule all:
         f"{VARIANT_DIR}/variants.vcf",
         f"{VARIANT_DIR}/filtered_variants.vcf",
         f"{SNPEFF_DATA_DIR}/reference.fasta",
+        f"{SNPEFF_DIR}/snpEff.config",
 
 
 
@@ -240,3 +241,26 @@ rule copy_reference_fasta:
         """
         cp {input.fasta} {output.fasta_copy}
         """
+
+rule snpEff_config_file:
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.copy_reference_fasta.output.fasta_copy,
+        reference_gbk = rules.download_reference.output.reference_gbk,
+    output:
+        snpEff_config = f"{SNPEFF_DIR}/snpEff.config"
+    shell:
+        r"""
+        echo Creating snpEff config file...
+        # Resolve absolute paths here using shell commands
+        REF_FASTA_ABS=$(readlink -f {RAW_DIR}/reference.fasta)
+        REF_GBK_ABS=$(readlink -f {SNPEFF_DATA_DIR}/genes.gbk)
+
+        cat <<EOF > {output.snpEff_config}
+# Custom snpEff config for reference_db
+reference_db.genome : reference_db
+reference_db.fa : $REF_FASTA_ABS
+reference_db.genbank : $REF_GBK_ABS
+EOF
+        echo snpEff config file created!
+        """    
