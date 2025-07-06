@@ -1,0 +1,5 @@
+Building DAG of jobs...
+MissingInputException in rule all in file /home/ubuntu/TRANKHANHNGUYEN_assignment_2/Snakefile, line 16:
+Missing input files for rule all:
+    affected files:
+        results/snakemake/.dirs_createdresults/raw/reference.fasta
