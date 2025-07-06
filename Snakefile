@@ -25,6 +25,7 @@ rule all:
         f"{RAW_DIR}/reference.fasta.bwt",
         f"{RAW_DIR}/reference.dict",
         f"{ALIGNED_DIR}/aligned.sam",
+        f"{ALIGNED_DIR}/aligned.sorted.bam",
 
 
 
@@ -141,3 +142,16 @@ rule read_alignment:
         bwa mem -R '@RG\\tID:1\\tLB:lib1\\tPL:illumina\\tPU:unit1\\tSM:sample1' {input.reference_fasta} {input.sequence_fastq} > {output.aligned_sam}
         echo Aligned reads!
         """
+
+rule sam_to_sorted_bam:
+    input:
+        marker = rules.create_dirs.output.marker,
+        aligned_sam = rules.read_alignment.output.aligned_sam,
+    output: 
+        sorted_bam = f"{ALIGNED_DIR}/aligned.sorted.bam"
+    shell:
+        """
+        echo Converting SAM to sorted BAM...
+        samtools view -b {input.aligned_sam} | samtools sort -o {output.sorted_bam}
+        echo Converted SAM to sorted BAM!
+        """ 
