@@ -180,7 +180,7 @@ rule mark_duplicates:
         metrics_txt = f"{ALIGNED_DIR}/dup_metrics.txt"
     shell:
         """
-        echo Marking duplicates...
+        echo Marking duplicates..
         gatk MarkDuplicates -I {input.sorted_bam} -O {output.dedup_bam} -M {output.metrics_txt}
         echo Duplicates marked!
         """
