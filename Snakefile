@@ -31,6 +31,7 @@ rule all:
         f"{ALIGNED_DIR}/dedup.bam.bai",
         f"{VARIANT_DIR}/variants.vcf",
         f"{VARIANT_DIR}/filtered_variants.vcf",
+        f"{SNPEFF_DATA_DIR}/reference.fasta",
 
 
 
@@ -229,3 +230,13 @@ rule filter_variants:
         gatk VariantFiltration -R {rules.download_reference.output.reference_fasta} -V {input.variants_vcf} -O {output.filtered_variants_vcf} --filter-expression "QD < 2.0 || FS > 60.0" --filter-name FILTER
         echo Variants filtered!
         """ 
+
+rule copy_reference_fasta:
+    input:
+        fasta = rules.download_reference.output.reference_fasta
+    output:
+        fasta_copy = f"{SNPEFF_DATA_DIR}/reference.fasta"
+    shell:
+        """
+        cp {input.fasta} {output.fasta_copy}
+        """
