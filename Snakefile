@@ -28,7 +28,8 @@ rule all:
         f"{ALIGNED_DIR}/aligned.sorted.bam",
         f"{ALIGNED_DIR}/validation_report.txt",
         f"{ALIGNED_DIR}/dedup.bam",
-        f"{ALIGNED_DIR}/dedup.bam.bai"
+        f"{ALIGNED_DIR}/dedup.bam.bai",
+        f"{VARIANT_DIR}/variants.vcf",
 
 
 
@@ -197,4 +198,20 @@ rule index_dedup_bam:
         echo Indexing deduplicated BAM file...
         samtools index {input.dedup_bam}
         echo Indexed deduplicated BAM file!
+        """ 
+
+rule variant_calling:
+    input:
+        marker = rules.create_dirs.output.marker,
+        dedup_bam = rules.mark_duplicates.output.dedup_bam,
+        dedup_bam_index = rules.index_dedup_bam.output.dedup_bam_index,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+    output:
+        variants_vcf = f"{VARIANT_DIR}/variants.vcf"
+    shell:
+        """
+        echo Calling variants...
+        mkdir -p {VARIANT_DIR}
+        gatk HaplotypeCaller -R {input.reference_fasta} -I {input.dedup_bam} -O {output.variants_vcf}
+        echo Variants called!
         """ 
