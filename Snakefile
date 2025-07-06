@@ -35,6 +35,8 @@ rule all:
         f"{SNPEFF_DIR}/snpEff.config",
         f"{SNPEFF_DATA_DIR}/.build_done",
         f"{SNPEFF_DIR}/snpEff.dump",
+        f"{ANNOTATED_DIR}/annotated_variants.vcf",
+        f"{SNPEFF_DIR}/snpEff.html",
 
 
 
@@ -295,3 +297,19 @@ rule export_snpEff_data:
         snpEff dump -c {input.snpEff_config} reference_db > {output.snpeff_dump}
         echo Exported snpEff database!
         """
+
+rule annotate_variants:
+    input:
+        marker = rules.create_dirs.output.marker,       
+        filtered_variants_vcf = rules.filter_variants.output.filtered_variants_vcf,
+        
+        snpEff_config = rules.snpEff_config_file.output.snpEff_config,
+    output:
+        annotated_vcf = f"{ANNOTATED_DIR}/annotated_variants.vcf",
+        snpEff_stats = f"{SNPEFF_DIR}/snpEff.html",
+    shell:
+        """
+        echo Annotating variants with snpEff...
+        snpEff -c {input.snpEff_config} -stats {output.snpEff_stats} reference_db {input.filtered_variants_vcf} > {output.annotated_vcf}
+        echo Variants annotated with snpEff!
+        """ 

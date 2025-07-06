@@ -1,0 +1,37 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                  count
+-----------------  -------
+all                      1
+annotate_variants        1
+total                    2
+
+Select jobs to execute...
+
+[Sun Jul  6 22:42:28 2025]
+rule annotate_variants:
+    input: results/snakemake/.dirs_created, results/variants/filtered_variants.vcf, results/snpEff/snpEff.config
+    output: results/annotated/annotated_variants.vcf, results/snpEff/snpEff.html
+    jobid: 20
+    reason: Missing output files: results/snpEff/snpEff.html, results/annotated/annotated_variants.vcf
+    resources: tmpdir=/tmp
+
+[Sun Jul  6 22:42:30 2025]
+Finished job 20.
+1 of 2 steps (50%) done
+Select jobs to execute...
+
+[Sun Jul  6 22:42:30 2025]
+localrule all:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/snpEff/data/reference_db/genes.gbk, results/raw/SRR1972739/SRR1972739.sra, results/raw/SRR1972739.fastq, results/qc/SRR1972739_fastqc.html, results/raw/reference.fasta.fai, results/raw/reference.fasta.bwt, results/raw/reference.dict, results/aligned/aligned.sam, results/aligned/aligned.sorted.bam, results/aligned/validation_report.txt, results/aligned/dedup.bam, results/aligned/dedup.bam.bai, results/variants/variants.vcf, results/variants/filtered_variants.vcf, results/snpEff/data/reference_db/reference.fasta, results/snpEff/snpEff.config, results/snpEff/data/reference_db/.build_done, results/snpEff/snpEff.dump, results/annotated/annotated_variants.vcf, results/snpEff/snpEff.html
+    jobid: 0
+    reason: Input files updated by another job: results/snpEff/snpEff.html, results/annotated/annotated_variants.vcf
+    resources: tmpdir=/tmp
+
+[Sun Jul  6 22:42:30 2025]
+Finished job 0.
+2 of 2 steps (100%) done
+Complete log: .snakemake/log/2025-07-06T224228.255767.snakemake.log
