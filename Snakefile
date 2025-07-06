@@ -23,7 +23,8 @@ rule all:
         f"{QC_DIR}/{SRA}_fastqc.html",
         f"{RAW_DIR}/reference.fasta.fai",
         f"{RAW_DIR}/reference.fasta.bwt",
-        f"{RAW_DIR}/reference.dict"
+        f"{RAW_DIR}/reference.dict",
+        f"{ALIGNED_DIR}/aligned.sam",
 
 
 
@@ -124,4 +125,19 @@ rule create_fasta_dict_gatk:
         echo Creating FASTA dictionary using GATK...
         gatk CreateSequenceDictionary -R {input.reference_fasta} -O {output.fasta_dict}
         echo Created FASTA dictionary!
+        """
+
+rule read_alignment:
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+        sequence_fastq = rules.extract_sequence.output.sequence_fastq,
+        bwa_index = rules.bwa_index.output.index_bwa,
+    output:
+        aligned_sam = f"{ALIGNED_DIR}/aligned.sam"
+    shell:
+        """
+        echo Aligning reads with read groups...
+        bwa mem -R '@RG\\tID:1\\tLB:lib1\\tPL:illumina\\tPU:unit1\\tSM:sample1' {input.reference_fasta} {input.sequence_fastq} > {output.aligned_sam}
+        echo Aligned reads!
         """
