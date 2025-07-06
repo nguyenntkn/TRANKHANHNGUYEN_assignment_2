@@ -33,6 +33,7 @@ rule all:
         f"{VARIANT_DIR}/filtered_variants.vcf",
         f"{SNPEFF_DATA_DIR}/reference.fasta",
         f"{SNPEFF_DIR}/snpEff.config",
+        f"{SNPEFF_DATA_DIR}/.build_done",
 
 
 
@@ -264,3 +265,17 @@ reference_db.genbank : $REF_GBK_ABS
 EOF
         echo snpEff config file created!
         """    
+
+rule build_snpEff_database:
+    input:
+        marker = rules.create_dirs.output.marker,
+        snpEff_config = rules.snpEff_config_file.output.snpEff_config,
+    output:
+        snpEff_done = f"{SNPEFF_DATA_DIR}/.build_done"
+    shell:
+        """
+        echo Building snpEff database...
+        snpEff build -c {input.snpEff_config} -genbank -v -noCheckProtein reference_db
+        touch {output.snpEff_done}
+        echo snpEff database built!
+        """
