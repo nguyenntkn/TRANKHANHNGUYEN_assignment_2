@@ -27,6 +27,7 @@ rule all:
         f"{ALIGNED_DIR}/aligned.sam",
         f"{ALIGNED_DIR}/aligned.sorted.bam",
         f"{ALIGNED_DIR}/validation_report.txt",
+        f"{ALIGNED_DIR}/dedup.bam",
 
 
 
@@ -168,4 +169,18 @@ rule validate_bam:
         echo Validating BAM file...
         gatk ValidateSamFile -I {input.sorted_bam} -MODE SUMMARY > {output.validation_report}
         echo BAM file validation completed!
+        """
+
+rule mark_duplicates:   
+    input:
+        marker = rules.create_dirs.output.marker,
+        sorted_bam = rules.sam_to_sorted_bam.output.sorted_bam,
+    output:
+        dedup_bam = f"{ALIGNED_DIR}/dedup.bam",
+        metrics_txt = f"{ALIGNED_DIR}/dup_metrics.txt"
+    shell:
+        """
+        echo Marking duplicates...
+        gatk MarkDuplicates -I {input.sorted_bam} -O {output.dedup_bam} -M {output.metrics_txt}
+        echo Duplicates marked!
         """
