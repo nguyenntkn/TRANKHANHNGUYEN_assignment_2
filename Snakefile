@@ -34,6 +34,7 @@ rule all:
         f"{SNPEFF_DATA_DIR}/reference.fasta",
         f"{SNPEFF_DIR}/snpEff.config",
         f"{SNPEFF_DATA_DIR}/.build_done",
+        f"{SNPEFF_DIR}/snpEff.dump",
 
 
 
@@ -278,4 +279,19 @@ rule build_snpEff_database:
         snpEff build -c {input.snpEff_config} -genbank -v -noCheckProtein reference_db
         touch {output.snpEff_done}
         echo snpEff database built!
+        """
+
+rule export_snpEff_data:
+    input:
+        marker = rules.create_dirs.output.marker,
+        filtered_variants_vcf = rules.filter_variants.output.filtered_variants_vcf,
+        snpEff_done = rules.build_snpEff_database.output.snpEff_done,
+        snpEff_config = rules.snpEff_config_file.output.snpEff_config,
+    output:
+        snpeff_dump = f"{SNPEFF_DIR}/snpEff.dump"
+    shell:
+        """
+        echo Exporting snpEff database...
+        snpEff dump -c {input.snpEff_config} reference_db > {output.snpeff_dump}
+        echo Exported snpEff database!
         """
