@@ -20,7 +20,8 @@ rule all:
         f"{SNPEFF_DATA_DIR}/genes.gbk",
         f"{RAW_DIR}/{SRA}/{SRA}.sra",
         f"{RAW_DIR}/{SRA}.fastq",
-        f"{QC_DIR}/{SRA}_fastqc.html"
+        f"{QC_DIR}/{SRA}_fastqc.html",
+        f"{RAW_DIR}/reference.fasta.fai",
 
 
 rule create_dirs:
@@ -82,4 +83,17 @@ rule fastqc_raw_reads:
         echo Running FastQC on raw reads...
         fastqc -o {QC_DIR} {input.sequence_fastq}
         echo FastQC completed!
+        """
+
+rule index_reference:
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+    output:
+        reference_fasta_index = f"{RAW_DIR}/reference.fasta.fai",
+    shell:
+        """
+        echo Indexing reference genome...
+        samtools faidx {input.reference_fasta}
+        echo Indexed reference genome!
         """

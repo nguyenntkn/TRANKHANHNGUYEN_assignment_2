@@ -1,0 +1,37 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                count
+---------------  -------
+all                    1
+index_reference        1
+total                  2
+
+Select jobs to execute...
+
+[Sun Jul  6 22:13:55 2025]
+rule index_reference:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta
+    output: results/raw/reference.fasta.fai
+    jobid: 6
+    reason: Missing output files: results/raw/reference.fasta.fai
+    resources: tmpdir=/tmp
+
+[Sun Jul  6 22:13:55 2025]
+Finished job 6.
+1 of 2 steps (50%) done
+Select jobs to execute...
+
+[Sun Jul  6 22:13:55 2025]
+localrule all:
+    input: results/snakemake/.dirs_created, results/raw/reference.fasta, results/snpEff/data/reference_db/genes.gbk, results/raw/SRR1972739/SRR1972739.sra, results/raw/SRR1972739.fastq, results/qc/SRR1972739_fastqc.html, results/raw/reference.fasta.fai
+    jobid: 0
+    reason: Input files updated by another job: results/raw/reference.fasta.fai
+    resources: tmpdir=/tmp
+
+[Sun Jul  6 22:13:55 2025]
+Finished job 0.
+2 of 2 steps (100%) done
+Complete log: .snakemake/log/2025-07-06T221354.430826.snakemake.log
