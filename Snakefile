@@ -20,6 +20,7 @@ rule all:
         f"{SNPEFF_DATA_DIR}/genes.gbk",
         f"{RAW_DIR}/{SRA}/{SRA}.sra",
         f"{RAW_DIR}/{SRA}.fastq",
+        f"{QC_DIR}/{SRA}_fastqc.html"
 
 
 rule create_dirs:
@@ -70,3 +71,15 @@ rule extract_sequence:
         echo Extracted sequencing data!
         """
 
+rule fastqc_raw_reads:
+    input:
+        marker = rules.create_dirs.output.marker,
+        sequence_fastq = rules.extract_sequence.output.sequence_fastq,
+    output:
+        fastqc_report = f"{QC_DIR}/{SRA}_fastqc.html"
+    shell:
+        """
+        echo Running FastQC on raw reads...
+        fastqc -o {QC_DIR} {input.sequence_fastq}
+        echo FastQC completed!
+        """
