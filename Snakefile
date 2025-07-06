@@ -28,6 +28,7 @@ rule all:
         f"{ALIGNED_DIR}/aligned.sorted.bam",
         f"{ALIGNED_DIR}/validation_report.txt",
         f"{ALIGNED_DIR}/dedup.bam",
+        f"{ALIGNED_DIR}/dedup.bam.bai"
 
 
 
@@ -184,3 +185,16 @@ rule mark_duplicates:
         gatk MarkDuplicates -I {input.sorted_bam} -O {output.dedup_bam} -M {output.metrics_txt}
         echo Duplicates marked!
         """
+
+rule index_dedup_bam:   
+    input:
+        marker = rules.create_dirs.output.marker,
+        dedup_bam = rules.mark_duplicates.output.dedup_bam,
+    output:
+        dedup_bam_index = f"{ALIGNED_DIR}/dedup.bam.bai"
+    shell:
+        """
+        echo Indexing deduplicated BAM file...
+        samtools index {input.dedup_bam}
+        echo Indexed deduplicated BAM file!
+        """ 
