@@ -23,6 +23,7 @@ rule all:
         f"{QC_DIR}/{SRA}_fastqc.html",
         f"{RAW_DIR}/reference.fasta.fai",
         f"{RAW_DIR}/reference.fasta.bwt",
+        f"{RAW_DIR}/reference.dict"
 
 
 
@@ -110,4 +111,17 @@ rule bwa_index:
         """
         echo Building BWA index...
         bwa index {input.reference_fasta}   
+        """
+
+rule create_fasta_dict_gatk: 
+    input:
+        marker = rules.create_dirs.output.marker,
+        reference_fasta = rules.download_reference.output.reference_fasta,
+    output:
+        fasta_dict = f"{RAW_DIR}/reference.dict"
+    shell:
+        """
+        echo Creating FASTA dictionary using GATK...
+        gatk CreateSequenceDictionary -R {input.reference_fasta} -O {output.fasta_dict}
+        echo Created FASTA dictionary!
         """
